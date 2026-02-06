@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiteCode Lab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' }</script>
+</head>
+<body class="bg-[#f7f7f5] dark:bg-[#0f0f0f] text-slate-900 dark:text-slate-100 p-10 transition-colors">
+
+<div class="max-w-4xl mx-auto">
+<div class="flex justify-between items-center mb-10">
+<h2 class="text-5xl font-black italic">Laboratório BiteCode</h2>
+<button id="themeToggle" onclick="toggleTheme()" class="border px-4 py-2 rounded-full text-lg"></button>
+</div>
+
+<div class="bg-white dark:bg-[#161616] rounded-3xl shadow-xl p-10">
+<label class="text-xs uppercase tracking-widest text-slate-400 font-bold">Receita</label>
+<textarea id="recipe"
+placeholder="Ex: 200g manteiga, 150g açúcar, 3 ovos, forno 180ºC…"
+class="w-full h-40 mt-4 p-5 bg-slate-100 dark:bg-[#0f0f0f] rounded-2xl focus:outline-none"></textarea>
+
+<button onclick="hack()" id="btn" class="mt-8 w-full py-5 rounded-full bg-orange-600 text-white font-black tracking-widest">
+Hackear Receita ⚡
+</button>
+
+<div id="result" class="hidden mt-8">
+<p class="text-xl font-bold" id="kcal"></p>
+<ul id="subs" class="mt-4 space-y-2"></ul>
+<p id="tip" class="mt-4 italic text-slate-500"></p>
+</div>
+</div>
+</div>
+
+<script src="theme.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
