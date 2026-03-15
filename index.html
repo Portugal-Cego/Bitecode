@@ -1,35 +1,299 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-pt">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BiteCode — Engenharia Alimentar</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config = { darkMode: 'class' }</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paulistana - Cardápio Digital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --cor-primaria: #E67E22;
+            --cor-whatsapp: #25D366;
+            --cor-glovo: #FFC244;
+            --cor-pascoa: #8E44AD;
+            --cor-fundo: #d2e9f4;
+            --cor-texto: #222;
+            --cor-fechado: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--cor-fundo);
+            display: flex; justify-content: center;
+        }
+
+        .phone-container {
+            width: 100vw; max-width: 480px;
+            background-color: white; min-height: 100vh;
+            position: relative; padding-bottom: 80px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .banner-wrapper img { width: 100%; display: block; }
+
+        /* BOTÕES TOPO */
+        .button-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 8px; padding: 0 12px; margin-top: -35px; z-index: 10; position: relative;
+        }
+        .btn {
+            aspect-ratio: 1/1.1; border-radius: 15px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: white; font-weight: 800; font-size: 8px; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: none; cursor: pointer;
+        }
+        .btn-glovo { background: var(--cor-glovo); color: #1b4d2e; }
+        .btn-whatsapp { background: var(--cor-whatsapp); }
+        .btn-cardapio { background: var(--cor-primaria); }
+        .btn-instagram { background: linear-gradient(45deg, #f09433, #dc2743, #cc2366, #bc1888); }
+        .btn i { font-size: 19px; margin-bottom: 6px; }
+
+        /* SECÇÕES */
+        .section-title { 
+            display: flex; align-items: center; margin: 35px 0 15px 15px; 
+            padding-left: 10px; border-left: 4px solid var(--cor-primaria);
+        }
+        .section-title h2 { font-size: 18px; font-weight: 900; margin: 0; color: var(--cor-texto); text-transform: uppercase; }
+        .pascoa-title { border-left-color: var(--cor-pascoa); }
+        .pascoa-title h2 { color: var(--cor-pascoa); }
+
+        /* SCROLL LATERAL */
+        .produtos-scroll {
+            display: flex; gap: 15px; padding: 0 15px 25px;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .produtos-scroll::-webkit-scrollbar { display: none; }
+
+        .item-card { min-width: 170px; cursor: pointer; }
+        .img-container { 
+            position: relative; width: 170px; height: 170px; 
+            border-radius: 25px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .price-tag { 
+            position: absolute; bottom: 12px; right: 12px; 
+            background: var(--cor-primaria); color: white; 
+            padding: 6px 12px; border-radius: 12px; font-weight: 900; font-size: 12px; 
+        }
+
+        .item-nome { display: block; margin-top: 10px; font-weight: 800; font-size: 14px; color: var(--cor-texto); line-height: 1.2; }
+
+        /* MODAIS */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 10001; display: none; justify-content: center; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; max-width: 480px; border-radius: 30px 30px 0 0; overflow: hidden; position: relative; padding-bottom: 30px; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* MENU POPUP */
+        .menu-corpo { padding: 20px; max-height: 70vh; overflow-y: auto; }
+        .menu-cat { color: var(--cor-primaria); font-weight: 900; font-size: 15px; border-bottom: 2px solid #eee; margin: 15px 0 10px; padding-bottom: 5px; text-transform: uppercase; }
+        .menu-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+        .menu-preco { color: var(--cor-primaria); font-weight: 900; }
+        
+        /* FOOTER STATUS */
+        .footer-status { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: white; padding: 12px; border-top: 1px solid #eee; display: flex; justify-content: center; z-index: 999; }
+        .status-badge { color: white; padding: 8px 25px; border-radius: 50px; font-size: 12px; font-weight: 900; transition: 0.3s; display: flex; align-items: center; gap: 8px; opacity: 0; animation: badgeIn 0.5s ease forwards; }
+        
+        /* Novas animações para o selo */
+        @keyframes badgeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+        }
+
+        .aberto { background: var(--cor-whatsapp); }
+        .aberto .status-dot { background: white; animation: pulse-green 2s infinite; }
+        
+        /* Animação de pulsação para Aberto */
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        .fechado { background: var(--cor-fechado); }
+        .fechado .status-dot { background: white; animation: pulse-red 2s infinite; }
+
+        /* Animação de pulsação para Fechado (mais subtil) */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+    </style>
 </head>
-<body class="bg-[#f7f7f5] dark:bg-[#0f0f0f] text-slate-900 dark:text-slate-100 transition-colors">
+<body>
 
-<header class="flex justify-between items-center max-w-6xl mx-auto px-6 py-6">
-<h1 class="text-3xl font-black italic">Bite<span class="text-orange-600">Code</span></h1>
-<button id="themeToggle" onclick="toggleTheme()" class="border px-4 py-2 rounded-full text-lg"></button>
-</header>
+<div class="phone-container">
+    <div class="banner-wrapper"><img src="https://i.ibb.co/CpPm4L1Y/1773578825624.png"></div>
 
-<section class="max-w-6xl mx-auto px-6 py-28 text-center">
-<h2 class="text-7xl font-black italic tracking-tight">
-Hackeia receitas.<br><span class="text-orange-600">Não o sabor.</span>
-</h2>
-<p class="mt-6 text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-Engenharia alimentar assistida por IA para reduzir calorias mantendo prazer e estrutura.
-</p>
-<a href="app.html" class="inline-block mt-12 px-10 py-5 rounded-full bg-orange-600 text-white font-bold">
-Entrar no Laboratório
-</a>
-</section>
+    <div class="button-grid">
+        <a href="https://glovoapp.com/pt/pt/lisboa/stores/paulistana-lis" class="btn btn-glovo"><i class="fa-solid fa-motorcycle"></i>GLOVO</a>
+        <a href="https://wa.me/351938180181" class="btn btn-whatsapp"><i class="fa-brands fa-whatsapp"></i>WHATSAPP</a>
+        <button class="btn btn-cardapio" onclick="openMenu()"><i class="fa-solid fa-utensils"></i>MENU</button>
+        <a href="https://instagram.com/paulistana_lisboa" class="btn btn-instagram"><i class="fa-brands fa-instagram"></i>INSTAGRAM</a>
+    </div>
 
-<footer class="text-center text-xs text-slate-400 py-10">
-BiteCode · Engenharia alimentar assistida por IA
-</footer>
+    <div class="section-title pascoa-title"><h2>Especial Páscoa 🐰</h2></div>
+    <div class="produtos-scroll">
+        <div class="item-card" onclick="openM('Bombom de Morango', 'Camadas de brigadeiro branco e morangos frescos em pedaços finalizado com ganache de chocolate.', '6,50€', 'https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/065ca5f0-608a-49fb-9f5a-39b706effc92.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/065ca5f0-608a-49fb-9f5a-39b706effc92.jpg"><span class="price-tag" style="background:var(--cor-pascoa)">6,50€</span></div>
+            <span class="item-nome">Bombom de Morango</span>
+        </div>
+        <div class="item-card" onclick="openM('Bombom de Uva', 'Camadas de brigadeiro branco e uvas verdes, finalizado com ganache de chocolate.', '6,50€', 'https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/420aecf2-5b01-432d-80bc-3372122bdf81.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/420aecf2-5b01-432d-80bc-3372122bdf81.jpg"><span class="price-tag" style="background:var(--cor-pascoa)">6,50€</span></div>
+            <span class="item-nome">Bombom de Uva</span>
+        </div>
+        <div class="item-card" onclick="openM('Cookie Bueno', 'Cookie crocante com recheio de kinder, fios de nutella e kinder bueno.', '5,00€', 'https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/d5e6e983-49cd-41d7-a286-72454e08eb4e.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/d5e6e983-49cd-41d7-a286-72454e08eb4e.jpg"><span class="price-tag" style="background:var(--cor-pascoa)">5,00€</span></div>
+            <span class="item-nome">Cookie Bueno</span>
+        </div>
+        <div class="item-card" onclick="openM('Cookie Nutella', 'Cookie crocante por fora e macia por dentro, recheada de nutella.', '5,00€', 'https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/ea836457-5671-4b0e-822e-bb312030dc3c.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/ea836457-5671-4b0e-822e-bb312030dc3c.jpg"><span class="price-tag" style="background:var(--cor-pascoa)">5,00€</span></div>
+            <span class="item-nome">Cookie Nutella</span>
+        </div>
+        <div class="item-card" onclick="openM('Vulcão de Cenoura', 'Bolo de cenoura fofinho com cobertura quente de brigadeiro tradicional.', '4,50€', 'https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/54c5b950-9483-4857-a223-8fa5135c2e56.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/global-menu-service/GV_PT/vendor/894513/product/54c5b950-9483-4857-a223-8fa5135c2e56.jpg"><span class="price-tag" style="background:var(--cor-pascoa)">4,50€</span></div>
+            <span class="item-nome">Vulcão de Cenoura</span>
+        </div>
+    </div>
 
-<script src="theme.js"></script>
+    <div class="section-title"><h2>Mais Pedidos</h2></div>
+    <div class="produtos-scroll">
+        <div class="item-card" onclick="openM('Coxinha à Paulistana', 'Coxinha de Frango cremosa.', '3,80€', 'https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764765692090385252.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764765692090385252.jpg"><span class="price-tag">3,80€</span></div>
+            <span class="item-nome">Coxinha à Paulistana</span>
+        </div>
+        <div class="item-card" onclick="openM('Pastel de Carne', 'Massa crocante e recheado com carne bovina picada.', '7,00€', 'https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764761482212597413.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764761482212597413.jpg"><span class="price-tag">7,00€</span></div>
+            <span class="item-nome">Pastel de Carne</span>
+        </div>
+        <div class="item-card" onclick="openM('Frango com Cream Cheese', 'Recheado com frango desfiado e cream cheese.', '7,00€', 'https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764761627542088453.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764761627542088453.jpg"><span class="price-tag">7,00€</span></div>
+            <span class="item-nome">Frango com Cheese</span>
+        </div>
+        <div class="item-card" onclick="openM('Pão de Queijo Grande', '12 minis pães de queijo.', '9,20€', 'https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764757746562454423.jpg')">
+            <div class="img-container"><img src="https://glovo.dhmedia.io/image/vso-so-backend/GV_PT/HP9LTA/attachment__1764757746562454423.jpg"><span class="price-tag">9,20€</span></div>
+            <span class="item-nome">Pão de Queijo Grande</span>
+        </div>
+    </div>
+</div>
+
+<div id="modal" class="modal-overlay" onclick="closeM()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <img id="m-img" src="" style="width:100%; height:250px; object-fit:cover;">
+        <div style="padding:20px;">
+            <h2 id="m-titulo" style="margin:0; font-size:20px;"></h2>
+            <p id="m-desc" style="color:#666; font-size:14px; margin:10px 0;"></p>
+            <div id="m-preco" style="font-size:24px; font-weight:900; color:var(--cor-primaria); margin-bottom:20px;"></div>
+            <a id="m-link" href="#" style="display:block; background:var(--cor-whatsapp); color:white; text-align:center; padding:15px; border-radius:12px; text-decoration:none; font-weight:800;">ENCOMENDAR NO WHATSAPP</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-menu" class="modal-overlay" onclick="closeMenu()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div style="padding:20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0; font-size:18px;">Cardápio Completo</h2>
+            <i class="fa-solid fa-xmark" onclick="closeMenu()" style="font-size:24px; cursor:pointer;"></i>
+        </div>
+        <div class="menu-corpo">
+            <div class="menu-cat">Pão de Queijo</div>
+            <div class="menu-item"><span>Grande (12 un)</span><span class="menu-preco">9,20 €</span></div>
+            <div class="menu-item"><span>Pequeno (6 un)</span><span class="menu-preco">5,80 €</span></div>
+
+            <div class="menu-cat">Pastéis Salgados</div>
+            <div class="menu-item"><span>Carne / Frango Cream Cheese / Pizza</span><span class="menu-preco">7,00 €</span></div>
+            <div class="menu-item"><span>Calabresa / Bauru / Queijo</span><span class="menu-preco">7,00 €</span></div>
+
+            <div class="menu-cat">Pastéis Premium</div>
+            <div class="menu-item"><span>Caipira / Carne c/ Queijo</span><span class="menu-preco">9,00 €</span></div>
+            <div class="menu-item"><span>Calabresa c/ Queijo</span><span class="menu-preco">9,00 €</span></div>
+
+            <div class="menu-cat">Doces & Páscoa</div>
+            <div class="menu-item"><span>Copo Felicidade (Morango/Uva)</span><span class="menu-preco">6,50 €</span></div>
+            <div class="menu-item"><span>Cookie (Bueno/Nutella)</span><span class="menu-preco">5,00 €</span></div>
+            <div class="menu-item"><span>Vulcão de Cenoura</span><span class="menu-preco">4,50 €</span></div>
+
+            <div class="menu-cat">Pastéis Doces</div>
+            <div class="menu-item"><span>Banana / Nutella / Romeu e Julieta</span><span class="menu-preco">7,20 €</span></div>
+
+            <div class="menu-cat">Bebidas</div>
+            <div class="menu-item"><span>Guaraná 33cl</span><span class="menu-preco">2,50 €</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="footer-status">
+    <div id="status-loja" class="status-badge">
+        <span class="status-dot"></span>
+        <span class="status-text">VERIFICANDO...</span>
+    </div>
+</div>
+
+<script>
+    function openM(t, d, p, i) {
+        document.getElementById('m-titulo').innerText = t;
+        document.getElementById('m-desc').innerText = d;
+        document.getElementById('m-preco').innerText = p;
+        document.getElementById('m-img').src = i;
+        document.getElementById('m-link').href = "https://wa.me/351938180181?text=" + encodeURIComponent("Olá! Gostaria de pedir: " + t);
+        document.getElementById('modal').style.display = 'flex';
+    }
+    function closeM() { document.getElementById('modal').style.display = 'none'; }
+    function openMenu() { document.getElementById('modal-menu').style.display = 'flex'; }
+    function closeMenu() { document.getElementById('modal-menu').style.display = 'none'; }
+
+    // SCRIPT DE HORÁRIO AUTOMÁTICO ATUALIZADO
+    function checkStatus() {
+        const agora = new Date();
+        const dia = agora.getDay(); // 0: Dom, 1: Seg, ..., 6: Sab
+        const hora = agora.getHours();
+        const min = agora.getMinutes();
+        const tempoAtual = hora * 100 + min;
+
+        let aberto = false;
+
+        const horarios = {
+            1: { inicio: 1830, fim: 2200 }, // Seg
+            2: { inicio: 1830, fim: 2200 }, // Ter
+            3: { inicio: 1830, fim: 2200 }, // Qua
+            4: { inicio: 1830, fim: 2200 }, // Qui
+            5: { inicio: 1830, fim: 2245 }, // Sex
+            6: { inicio: 1830, fim: 2345 }, // Sab
+            0: { inicio: 1500, fim: 2200 }  // Dom
+        };
+
+        const hoje = horarios[dia];
+        if (tempoAtual >= hoje.inicio && tempoAtual <= hoje.fim) {
+            aberto = true;
+        }
+
+        const badge = document.getElementById('status-loja');
+        const textSpan = badge.querySelector('.status-text');
+        
+        if (aberto) {
+            textSpan.innerText = "ABERTOS AGORA";
+            badge.className = "status-badge aberto";
+        } else {
+            textSpan.innerText = "FECHADOS NO MOMENTO";
+            badge.className = "status-badge fechado";
+        }
+    }
+
+    checkStatus();
+    setInterval(checkStatus, 60000); // Atualiza a cada minuto
+</script>
+
 </body>
 </html>
